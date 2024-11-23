@@ -16,8 +16,8 @@ async def welcome(user_id):
     return {'message': f'Вы вошли как пользователь № {user_id}'}
 
 
-@app.get('/user/{username}/{age}')
-async def welcome(username, age):
+@app.get('/user')
+async def welcome(username: str, age: int):
     return {'message': f'Информация о пользователе. Имя: {username}, Возраст: {age}'}
 
 
