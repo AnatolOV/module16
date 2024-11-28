@@ -1,36 +1,24 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
-
 users = []
-
 
 class User(BaseModel):
     id: int = None
     username: str
     age: int
 
-
 @app.get('/users')
 async def get_message():
     return users
 
-
-# get запрос по маршруту '/users' теперь возвращает список users.
-
 @app.post('/user/{username}/{age}')
 async def create_message(username: str, age: int):
-    id = 0
-    if len(users) > 0:
-        id = len(users)
-    else:
-        id = 1
-    print(id)
-    new_user = User(id=id, username=username, age=age)
+    user_id = (max([user.id for user in users], default=0) + 1)
+    new_user = User(id=user_id, username=username, age=age)
     users.append(new_user)
     return new_user
-
 
 @app.put('/user/{user_id}/{username}/{age}')
 async def update_message(user_id: int, username: str, age: int):
@@ -41,7 +29,6 @@ async def update_message(user_id: int, username: str, age: int):
             return user
         else:
             raise HTTPException(status_code=404, detail="User was not found")
-
 
 @app.delete('/user/{user_id}')
 async def delete_message(user_id):
