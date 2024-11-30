@@ -1,5 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status, Body, Request
 from pydantic import BaseModel
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from typing import List
+
+templates = Jinja2Templates(directory='templates')
 
 app = FastAPI()
 users = []
@@ -9,9 +14,20 @@ class User(BaseModel):
     username: str
     age: int
 
-@app.get('/users')
-async def get_message():
-    return users
+
+@app.get('/')
+async def get_all_messages(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse('users.html',{'request': request, 'users': users})
+
+
+@app.get('/user/{user_id}')
+async def get_message(request: Request, user_id: int):
+    print(users[user_id -1].age)
+    return templates.TemplateResponse('users.html',{
+        "request": request,
+        "users": users
+    })
+
 
 @app.post('/user/{username}/{age}')
 async def create_message(username: str, age: int):
@@ -19,6 +35,7 @@ async def create_message(username: str, age: int):
     new_user = User(id=user_id, username=username, age=age)
     users.append(new_user)
     return new_user
+
 
 @app.put('/user/{user_id}/{username}/{age}')
 async def update_message(user_id: int, username: str, age: int):
@@ -29,6 +46,7 @@ async def update_message(user_id: int, username: str, age: int):
             return user
         else:
             raise HTTPException(status_code=404, detail="User was not found")
+
 
 @app.delete('/user/{user_id}')
 async def delete_message(user_id: str):
