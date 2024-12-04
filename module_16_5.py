@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status, Body, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from typing import List
@@ -12,7 +12,7 @@ users = []
 class User(BaseModel):
     id: int = None
     username: str
-    age: int
+    age: conint(ge=0)
 
 
 @app.get('/')
@@ -23,9 +23,10 @@ async def get_all_messages(request: Request) -> HTMLResponse:
 @app.get('/user/{user_id}')
 async def get_message(request: Request, user_id: int):
     print(users[user_id -1].age)
+    user = users[user_id-1]
     return templates.TemplateResponse('users.html',{
         "request": request,
-        "users": users
+        "user": user
     })
 
 
